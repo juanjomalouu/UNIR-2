@@ -1,0 +1,27 @@
+---
+- name : Log in to ACR created by Terraform
+  containers.podman.podman_login:
+    username: "jjperezabadUNIR"
+    password: "GBxmBY+ZKToQsO6Ycid86ONfHEeaA97xhh+tkPVcnI+ACRBm9+cs"
+    registry: "jjperezabadunir.azurecr.io"
+
+  # Descargar nginx de docker hub (VM)
+- name: Pull nginx image from Docker Hub
+  containers.podman.podman_image:
+    name: docker.io/library/nginx
+    state: present
+    tag: latest
+
+# Etiquetar la imagen para subirla a "jjperezabadUNIR"
+- name: Tag and push nginx image to ACR
+  containers.podman.podman_tag:
+    image: docker.io/library/nginx:latest
+    target_names: jjperezabadunir.azurecr.io/nginx:casopractico2
+
+- name: Push nginx image to ACR
+  containers.podman.podman_image:
+    name: jjperezabadunir.azurecr.io/nginx
+    tag: casopractico2
+    state: present
+    push: yes
+

@@ -1,0 +1,106 @@
+---
+# Actualizar repositorios
+- name : Apt get update
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+
+# Instalar Podman
+- name: Install Podman
+  become: yes
+  package:
+    name: podman
+    state: present
+
+# Log in to ACR created by Terraform
+- name : Log in to ACR created by Terraform
+  containers.podman.podman_login:
+    username: "jjperezabadUNIR"
+    password: "GBxmBY+ZKToQsO6Ycid86ONfHEeaA97xhh+tkPVcnI+ACRBm9+cs"
+    registry: "jjperezabadunir.azurecr.io"
+
+# Pull de la imagen desde ACR
+- name: Pull nginx Image from ACR
+  containers.podman.podman_image:
+    name: jjperezabadunir.azurecr.io/nginx
+    state: present
+    tag: casopractico2
+
+# Crear el directorio /var/www/html en el host para montar el volumen
+- name: Create directory
+  become: yes
+  file:
+    path: /var/www/html
+    state: directory
+    mode: 0755
+
+- name: Ajustar permisos de /var/www/html
+  become: yes
+  file:
+    path: /var/www/html
+    state: directory
+    mode: '0755'
+    recurse: yes
+    owner: 1000
+    group: 1000
+
+# Configurar el sistema para permitir puertos no privilegiados desde el puerto 80
+- name: Allow unprivileged ports to start from 80
+  become: yes
+  sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: 80
+    state: present
+    reload: yes
+
+
+
+- name: Arrancar servicio con la imagen descargada y un volume montado para acceso desde el host
+  containers.podman.podman_container:
+    name: nginx
+    image: jjperezabadunir.azurecr.io/nginx:casopractico2
+    state: started
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/www/html:/usr/share/nginx/html"
+    restart_policy: always
+
+- name: Instalar python3-passlib
+  become: yes
+  ansible.builtin.apt:
+    name: python3-passlib
+    state: present
+
+- name: Crear usuario con autenticación básica
+  become: yes
+  ansible.builtin.htpasswd:
+    path: /var/www/html/.htpasswd
+    name: admin
+    password: admin
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ajustar permisos de los archivos en /var/www/html
+  become: yes
+  file:
+    path: /var/www/html
+    state: directory
+    mode: '0755'
+    recurse: yes
+
+- name: Reiniciamos el container
+  containers.podman.podman_container:
+    name: nginx
+    state: started
+    restart: true  
+
+- name: Comprobamos que el container está corriendo
+  command: podman ps
+  register: podman_ps
+
+- name: Mostrar el resultado del comando podman ps
+  debug:
+    msg: "{{ podman_ps.stdout }}"
+
