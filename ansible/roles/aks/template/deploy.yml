@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: unir
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: jjperezabadunir.azurecr.io/redis:casopractico2
+      ports: 
+      - containerPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: votefront
+  namespace: unir
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: votefront
+  template:
+    metadata:
+      labels:
+        app: votefront
+    spec:
+      containers:
+      - name: votefront
+        image: jjperezabadunir.azurecr.io/azure-vote-front:casopractico2
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: frontend
+  namespace: unir
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  selector:
+    app: votefront

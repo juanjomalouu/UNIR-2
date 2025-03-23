@@ -15,8 +15,8 @@
 # Log in to ACR created by Terraform
 - name : Log in to ACR created by Terraform
   containers.podman.podman_login:
-    username: "jjperezabadUNIR"
-    password: "GBxmBY+ZKToQsO6Ycid86ONfHEeaA97xhh+tkPVcnI+ACRBm9+cs"
+    username: "XXXXXXX"
+    password: "XXXXXXX"
     registry: "jjperezabadunir.azurecr.io"
 
 # Pull de la imagen desde ACR
@@ -34,6 +34,7 @@
     state: directory
     mode: 0755
 
+# Ajustamos permisos del directorio
 - name: Ajustar permisos de /var/www/html
   become: yes
   file:
@@ -41,8 +42,8 @@
     state: directory
     mode: '0755'
     recurse: yes
-    owner: 1000
-    group: 1000
+    owner: root
+    group: root
 
 # Configurar el sistema para permitir puertos no privilegiados desde el puerto 80
 - name: Allow unprivileged ports to start from 80
@@ -53,8 +54,7 @@
     state: present
     reload: yes
 
-
-
+# Arrancar servicio con la imagen de nginx y el volume montado
 - name: Arrancar servicio con la imagen descargada y un volume montado para acceso desde el host
   containers.podman.podman_container:
     name: nginx
@@ -66,12 +66,14 @@
       - "/var/www/html:/usr/share/nginx/html"
     restart_policy: always
 
+# Instalamos passlib
 - name: Instalar python3-passlib
   become: yes
   ansible.builtin.apt:
     name: python3-passlib
     state: present
 
+# Creamos el usuario con autenticación básica
 - name: Crear usuario con autenticación básica
   become: yes
   ansible.builtin.htpasswd:
@@ -82,25 +84,10 @@
     group: root
     mode: 0644
 
-- name: Ajustar permisos de los archivos en /var/www/html
-  become: yes
-  file:
-    path: /var/www/html
-    state: directory
-    mode: '0755'
-    recurse: yes
-
+# Reiniciar container
 - name: Reiniciamos el container
   containers.podman.podman_container:
     name: nginx
     state: started
     restart: true  
-
-- name: Comprobamos que el container está corriendo
-  command: podman ps
-  register: podman_ps
-
-- name: Mostrar el resultado del comando podman ps
-  debug:
-    msg: "{{ podman_ps.stdout }}"
 

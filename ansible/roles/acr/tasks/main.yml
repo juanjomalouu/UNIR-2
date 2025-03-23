@@ -1,23 +1,68 @@
 ---
+# Entramos en el ACR creado por Terraform
 - name : Log in to ACR created by Terraform
   containers.podman.podman_login:
-    username: "jjperezabadUNIR"
-    password: "GBxmBY+ZKToQsO6Ycid86ONfHEeaA97xhh+tkPVcnI+ACRBm9+cs"
+    username: "XXXXX"
+    password: "XXXXX"
     registry: "jjperezabadunir.azurecr.io"
 
-  # Descargar nginx de docker hub (VM)
+
+# Aniadir imagen de azure vote front 
+- name: Pull azure-vote-front image from Docker Hub
+  containers.podman.podman_image:
+    name: docker.io/fernandezsalazarnieve/azure-vote-front
+    state: present
+    tag: v1
+
+# Etiquetar la imagen azure vote front con tag casopractico2 para subirla al ACR "jjperezabadUNIR"
+- name: Tag and push azure-vote-front image to ACR
+  containers.podman.podman_tag:
+    image: docker.io/fernandezsalazarnieve/azure-vote-front:v1
+    target_names: jjperezabadunir.azurecr.io/azure-vote-front:casopractico2
+
+# Pushear imagen azure vote front al ACR
+- name: Push azure-vote-front image to ACR
+  containers.podman.podman_image:
+    name: jjperezabadunir.azurecr.io/azure-vote-front
+    tag: casopractico2
+    state: present
+    push: yes
+
+# Aniadir imagen de redis
+- name: Pull redis image from Microsoft
+  containers.podman.podman_image:
+    name: mcr.microsoft.com/oss/bitnami/redis
+    state: present
+    tag: 6.0.8
+
+# Etiquetar la imagen redis con tag casopractico2 para subirla al ACR "jjperezabadUNIR"
+- name: Tag and push redis image to ACR
+  containers.podman.podman_tag:
+    image: mcr.microsoft.com/oss/bitnami/redis:6.0.8
+    target_names: jjperezabadunir.azurecr.io/redis:casopractico2
+
+# Pushear imagen redis al ACR
+- name: Push redis image to ACR
+  containers.podman.podman_image:
+    name: jjperezabadunir.azurecr.io/redis
+    tag: casopractico2
+    state: present
+    push: yes
+
+# Descargar nginx de docker hub (VM)
 - name: Pull nginx image from Docker Hub
   containers.podman.podman_image:
     name: docker.io/library/nginx
     state: present
     tag: latest
 
-# Etiquetar la imagen para subirla a "jjperezabadUNIR"
+# Etiquetar la imagen nginx para subirla a "jjperezabadUNIR"
 - name: Tag and push nginx image to ACR
   containers.podman.podman_tag:
     image: docker.io/library/nginx:latest
     target_names: jjperezabadunir.azurecr.io/nginx:casopractico2
 
+# Pushear imagen nginx al ACR
 - name: Push nginx image to ACR
   containers.podman.podman_image:
     name: jjperezabadunir.azurecr.io/nginx

@@ -1,4 +1,5 @@
 ---
+# Acciones relacionadas con el ACR
 - name: Setup ACR and images
   hosts: localhost
   vars_files:
@@ -8,15 +9,17 @@
     include_role:
       name: acr
 
-# - name: Setup Webserver
-#   hosts: vm
-#   vars_files:
-#     - secrets.yml
-#   tasks:
-#   - name: Configure VM with Podman and deploy web server
-#     include_role:
-#       name: vm
+# Acciones relacionadas con la máquina virtual
+- name: Setup Webserver
+  hosts: vm
+  vars_files:
+    - secrets.yml
+  tasks:
+  - name: Configure VM with Podman and deploy web server
+    include_role:
+      name: vm
 
+# Acciones relacionadas con el AKS
 - name: Setup AKS
   hosts: localhost
   vars_files:

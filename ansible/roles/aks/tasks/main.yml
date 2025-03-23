@@ -1,17 +1,17 @@
 ---
-- name: Install kubernetes module
-  pip:
-    name: kubernetes
-
+# Crear namespace en el que se añadiran los recursos
 - name: Create namespace
   k8s:
     definition:
       kind: namespace
       apiVersion: v1
       metadata:
-        name: "{{ app_namespace }}"
-        
+        name: "unir"
+
+# Crear los deployments y servicios en el namespace creado
 - name: Deploy app
   k8s:
-    definition: "{{ lookup('template', 'deployment.yml') }}"
-    namespace: "{{ app_namespace }}"
+    kubeconfig: "~/.kube/config"
+    state: present
+    src: roles/aks/template/deploy.yml
+    namespace: "unir"
