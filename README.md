@@ -1,6 +1,6 @@
 # Azure Infrastructure Automation with Terraform & Ansible
 
-## 🚀 Overview  
+## Overview  
 UNIR-2 is an infrastructure-as-code (IaC) project that uses Terraform and Ansible to automate the provisioning, configuration, and deployment of cloud infrastructure and applications — enabling reproducible and scalable environments with minimal manual effort.
 
 ## Description  
@@ -22,7 +22,7 @@ Ensure you have installed:
 - Access credentials for the cloud provider (e.g. Azure) with permissions to create resources, manage registries, VMs, Kubernetes clusters.  
 - Podman or compatible container runtime (if deploying via containers on VMs).
 
-## 📥 Installation & Setup (local / first-time)  
+## Installation & Setup (local / first-time)  
 
 ```bash
 # 1. Clone the repository
